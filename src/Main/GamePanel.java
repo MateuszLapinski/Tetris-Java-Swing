@@ -9,6 +9,8 @@ public class GamePanel extends JPanel implements Runnable  {
     final int FPS=60;
     private Thread gameThread;
     private PlayManager playManager;
+    public static Sound music=new Sound();
+    public static Sound soundEffect= new Sound();
 
 
     public GamePanel(){
@@ -23,6 +25,8 @@ public class GamePanel extends JPanel implements Runnable  {
     public void launchGame(){
         gameThread =new Thread(this);
         gameThread.start();
+        music.play(0,true);
+        music.loop();
     }
 
 
@@ -46,7 +50,7 @@ public class GamePanel extends JPanel implements Runnable  {
     }
 
     private void update(){
-        if(KeyHandler.pausePressed==false){
+        if(KeyHandler.pausePressed==false && !playManager.isGameOver()){
             playManager.update();
         }else{
 

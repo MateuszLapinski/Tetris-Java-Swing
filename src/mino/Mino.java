@@ -4,6 +4,7 @@ import Main.KeyHandler;
 import Main.PlayManager;
 
 import java.awt.*;
+
 public class Mino {
     public Block blockTable[]= new Block[4];
     public Block tempB[]= new Block[4];
@@ -11,6 +12,8 @@ public class Mino {
     private int direction=1;
     private boolean leftCollision, rightCollision, bottomCollision;
     public boolean active=true;
+    public boolean deactivating;
+    int deactivateCounter=0;
 
     public void create(Color c){
         blockTable[0]=new Block(c);
@@ -25,12 +28,25 @@ public class Mino {
 
     public void setPosition(int x, int y){}
     private void checkStaticBlockCollision(){
-        for(Block block: PlayManager.staticBlocks){
-            int targetX= block.x;
-            int targetY =block.y;
-            for(Block block1: blockTable){
-                if(block1.y+Block.SIZE== targetY && block1.x==targetX){
+        for(int i=0; i<PlayManager.staticBlocks.size();i++){
+            int targetX= PlayManager.staticBlocks.get(i).x;
+            int targetY =PlayManager.staticBlocks.get(i).y;
+            //Down Collision
+            for(int ii=0;ii< blockTable.length;ii++){
+                if(blockTable[ii].y+Block.SIZE==targetY && blockTable[ii].x==targetX){
                     bottomCollision=true;
+                }
+            }
+
+            //SideCollision
+            for(int ii=0;ii< blockTable.length;ii++){
+                if(blockTable[ii].x-Block.SIZE==targetX && blockTable[ii].y==targetY){
+                    leftCollision=true;
+                }
+            }
+            for(int ii=0;ii< blockTable.length;ii++){
+                if(blockTable[ii].x+Block.SIZE==targetX && blockTable[ii].y==targetY){
+                    rightCollision=true;
                 }
             }
         }
@@ -89,6 +105,16 @@ public class Mino {
     public void getDirection2(){};
     public void getDirection3(){};
     public void getDirection4(){};
+    private void deactivating(){
+        deactivateCounter++;
+        if(deactivateCounter==45){
+            deactivateCounter=0;
+            checkMovementCollision();
+            if(bottomCollision){
+                active=false;
+            }
+        }
+    }
     public void updatePosition(int direction) {
         checkRotationCollision();
 
@@ -105,6 +131,10 @@ public class Mino {
         }
     }
     public void move(){
+
+        if(deactivating){
+            deactivating();
+        }
         if(KeyHandler.upPressed){
             System.out.println(direction);
             switch (direction){
@@ -139,10 +169,11 @@ public class Mino {
     }
 
     public void update(){
+        move();
         if(bottomCollision){
-            active=false;
+           deactivating=true;
+
         }else {
-            move();
             autoDropCounter++;
             if(autoDropCounter == PlayManager.dropInterval){
                 blockTable[0].y+=Block.SIZE;
